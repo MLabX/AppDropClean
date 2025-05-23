@@ -58,7 +58,12 @@ struct AppDropCleanRootView: View {
                     },
                     onZap: {
                         let toDelete = files.filter { selectedFileIDs.contains($0.id) }
-                        FileDeleter.moveFilesToTrash(toDelete)
+                        let failed = FileDeleter.moveFilesToTrash(toDelete)
+                        if !failed.isEmpty {
+                            let fileList = failed.map { "\($0.0.displayName): \($0.1)" }.joined(separator: "\n")
+                            errorMessage = "Some items could not be deleted:\n\n" + fileList + "\n\nThis is usually due to lack of permission. Try moving the app to the Trash manually or check your permissions."
+                            showErrorAlert = true
+                        }
                         appState = .idle
                     }
                 )

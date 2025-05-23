@@ -34,7 +34,7 @@ struct ResultsView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     ForEach(files) { file in
-                        HStack(spacing: 8) {
+                        HStack(alignment: .center, spacing: 8) {
                             Toggle(isOn: Binding(
                                 get: { selectedFileIDs.contains(file.id) },
                                 set: { checked in
@@ -45,11 +45,11 @@ struct ResultsView: View {
                                     }
                                 }
                             )) {
-                                HStack(spacing: 8) {
+                                HStack(alignment: .center, spacing: 8) {
                                     Image(systemName: file.type.symbol)
                                         .foregroundColor(TiffanyTheme.accent)
-                                        .frame(width: 24)
-                                    VStack(alignment: .leading) {
+                                        .frame(width: 24, alignment: .center)
+                                    VStack(alignment: .leading, spacing: 0) {
                                         Text(file.displayName)
                                             .font(.body)
                                         Text(file.type.rawValue)

@@ -12,3 +12,6 @@
 - FileScanner now scans for all standard support files and is ready for fuzzy matching
 - Removed redundant views, unified UI logic
 - Ready for first commit to [github.com/MLabX/AppDropClean](https://github.com/MLabX/AppDropClean) 
+
+## 2024-06-12
+- Improved error handling: If any files cannot be deleted (e.g., due to permissions), a user-friendly alert is shown listing the failed files and suggesting manual deletion or checking permissions. 

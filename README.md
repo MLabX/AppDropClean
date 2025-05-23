@@ -12,6 +12,7 @@ A minimal, elegant macOS SwiftUI app inspired by AppZapper, designed to help you
 - Minimal, Tiffany Blue-accented UI
 - Native macOS look and feel (VisualEffectBackground, system icons, dark mode)
 - All UI strings and metrics are centralized for easy localization and customization
+- User-friendly error handling: If files cannot be deleted (e.g., due to permissions), a clear alert is shown listing failed files and suggesting manual deletion.
 
 ## Folder Structure
 ```

@@ -36,4 +36,5 @@
 - [ ] Ensure dark mode adapts all custom colors.
 
 ### 7. Sound
-- [ ] Integrate AVFoundation to play a zap sound on deletion. 
+- [ ] Integrate AVFoundation to play a zap sound on deletion.
+- [x] Show user-friendly alert if files cannot be deleted (e.g., due to permissions), listing failed files and suggesting manual deletion. 

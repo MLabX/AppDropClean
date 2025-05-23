@@ -9,43 +9,56 @@ class FileScanner {
         let fileManager = FileManager.default
         let home = fileManager.homeDirectoryForCurrentUser
         var results: [ScannedFile] = []
+        var seenPaths = Set<String>()
+        let appName = appURL.deletingPathExtension().lastPathComponent
+        let appNameLower = appName.lowercased()
+        let bundleIDLower = bundleID.lowercased()
 
-        let supportPaths: [(String, String, FileType)] = [
-            ("Application", appURL.path, .application),
-            ("Preferences", home.appendingPathComponent("Library/Preferences/")
-                .appendingPathComponent(bundleID + ".plist").path, .preference),
-            ("Caches", home.appendingPathComponent("Library/Caches/")
-                .appendingPathComponent(bundleID).path, .cache),
-            ("Application Support", home.appendingPathComponent("Library/Application Support/")
-                .appendingPathComponent(bundleID).path, .applicationSupport),
-            ("Saved State", home.appendingPathComponent("Library/Saved Application State/")
-                .appendingPathComponent(bundleID + ".savedState").path, .savedState),
-            ("Logs", home.appendingPathComponent("Library/Logs/")
-                .appendingPathComponent(bundleID).path, .logs),
-            ("Containers", home.appendingPathComponent("Library/Containers/")
-                .appendingPathComponent(bundleID).path, .container),
-            ("Group Containers", home.appendingPathComponent("Library/Group Containers/")
-                .appendingPathComponent(bundleID).path, .groupContainer)
+        let searchDirs: [(FileType, URL)] = [
+            (.preference, home.appendingPathComponent("Library/Preferences")),
+            (.cache, home.appendingPathComponent("Library/Caches")),
+            (.applicationSupport, home.appendingPathComponent("Library/Application Support")),
+            (.logs, home.appendingPathComponent("Library/Logs")),
+            (.savedState, home.appendingPathComponent("Library/Saved Application State")),
+            (.container, home.appendingPathComponent("Library/Containers")),
+            (.groupContainer, home.appendingPathComponent("Library/Group Containers"))
         ]
 
-        // Recent Documents (NSRecentDocuments)
-        let recentDocsGlob = home.appendingPathComponent("Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentDocuments/").path
-        if let recentDocs = try? fileManager.contentsOfDirectory(atPath: recentDocsGlob) {
-            for file in recentDocs where file.lowercased().contains(bundleID) {
-                let path = (recentDocsGlob as NSString).appendingPathComponent(file)
-                if fileManager.fileExists(atPath: path) {
-                    let size = fileSize(atPath: path, fileManager: fileManager)
-                    results.append(ScannedFile(id: UUID(), displayName: "Recent Document", path: path, type: .recentDocument, size: size))
+        for (type, dir) in searchDirs {
+            if let files = try? fileManager.contentsOfDirectory(atPath: dir.path) {
+                for file in files {
+                    let lower = file.lowercased()
+                    if lower.contains(bundleIDLower) || lower.contains(appNameLower) {
+                        let path = dir.appendingPathComponent(file).path
+                        if !seenPaths.contains(path) && fileManager.fileExists(atPath: path) {
+                            let size = fileSize(atPath: path, fileManager: fileManager)
+                            results.append(ScannedFile(id: UUID(), displayName: file, path: path, type: type, size: size))
+                            seenPaths.insert(path)
+                        }
+                    }
                 }
             }
         }
 
-        for (name, path, type) in supportPaths {
-            if fileManager.fileExists(atPath: path) {
-                let size = fileSize(atPath: path, fileManager: fileManager)
-                results.append(ScannedFile(id: UUID(), displayName: name, path: path, type: type, size: size))
+        // Recent Documents (NSRecentDocuments)
+        let recentDocsGlob = home.appendingPathComponent("Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.RecentDocuments/").path
+        if let recentDocs = try? fileManager.contentsOfDirectory(atPath: recentDocsGlob) {
+            for file in recentDocs where file.lowercased().contains(bundleIDLower) || file.lowercased().contains(appNameLower) {
+                let path = (recentDocsGlob as NSString).appendingPathComponent(file)
+                if !seenPaths.contains(path) && fileManager.fileExists(atPath: path) {
+                    let size = fileSize(atPath: path, fileManager: fileManager)
+                    results.append(ScannedFile(id: UUID(), displayName: file, path: path, type: .recentDocument, size: size))
+                    seenPaths.insert(path)
+                }
             }
         }
+
+        // Add the app bundle itself
+        let appSize = fileSize(atPath: appURL.path, fileManager: fileManager)
+        if !seenPaths.contains(appURL.path) {
+            results.append(ScannedFile(id: UUID(), displayName: appName, path: appURL.path, type: .application, size: appSize))
+        }
+
         return results
     }
     

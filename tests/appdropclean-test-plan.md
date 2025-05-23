@@ -19,6 +19,9 @@
 - Cancel does not delete files.
 - Errors are logged and shown if deletion fails.
 
+### 5. Error Handling
+- Attempt to delete an app or file you do not have permission to remove (e.g., a system app in /Applications): Should show a user-friendly alert listing the failed files and suggesting manual deletion or checking permissions.
+
 ## Automated Tests (suggested)
 - Unit test FileScanner for various bundle IDs and fuzzy matching (future)
 - Unit test FileDeleter with mock files
